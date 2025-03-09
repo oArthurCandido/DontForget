@@ -40,10 +40,12 @@ export default async function Dashboard() {
                 Create and manage your study materials
               </p>
             </div>
-            <Button className="flex items-center gap-2">
-              <Plus size={16} />
-              <span>Create New Deck</span>
-            </Button>
+            <Link href="/dashboard/create">
+              <Button className="flex items-center gap-2">
+                <Plus size={16} />
+                <span>Create New Deck</span>
+              </Button>
+            </Link>
           </header>
 
           {/* Search Section */}
@@ -61,18 +63,20 @@ export default async function Dashboard() {
           {/* Decks Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {/* Create New Deck Card */}
-            <div className="border border-dashed border-gray-300 rounded-xl p-6 flex flex-col items-center justify-center text-center h-64 hover:border-blue-400 hover:bg-blue-50 transition-colors cursor-pointer">
-              <div className="bg-blue-100 rounded-full p-3 mb-4">
-                <Plus size={24} className="text-blue-600" />
+            <Link href="/dashboard/create">
+              <div className="border border-dashed border-gray-300 rounded-xl p-6 flex flex-col items-center justify-center text-center h-64 hover:border-blue-400 hover:bg-blue-50 transition-colors cursor-pointer">
+                <div className="bg-blue-100 rounded-full p-3 mb-4">
+                  <Plus size={24} className="text-blue-600" />
+                </div>
+                <h3 className="text-lg font-semibold mb-2">Create New Deck</h3>
+                <p className="text-sm text-gray-500 mb-4">
+                  Start building a new set of quiz questions
+                </p>
+                <Button variant="outline" size="sm">
+                  Get Started
+                </Button>
               </div>
-              <h3 className="text-lg font-semibold mb-2">Create New Deck</h3>
-              <p className="text-sm text-gray-500 mb-4">
-                Start building a new set of quiz questions
-              </p>
-              <Button variant="outline" size="sm">
-                Get Started
-              </Button>
-            </div>
+            </Link>
 
             {/* Sample Deck Cards (or actual decks if available) */}
             {decks && decks.length > 0 ? (
@@ -96,9 +100,11 @@ export default async function Dashboard() {
                         {/* This would need a count query in a real implementation */}
                         0 questions
                       </div>
-                      <Button variant="ghost" size="sm">
-                        Study
-                      </Button>
+                      <Link href={`/dashboard/decks/${deck.id}/study`}>
+                        <Button variant="ghost" size="sm">
+                          Study
+                        </Button>
+                      </Link>
                     </div>
                   </div>
                 </Link>

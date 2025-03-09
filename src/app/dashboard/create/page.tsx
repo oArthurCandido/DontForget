@@ -127,12 +127,22 @@ export default function CreateDeck() {
     setIsLoading(true);
 
     try {
-      // 1. Create the deck
+      // Get current user
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (!user) {
+        throw new Error("User not authenticated");
+      }
+
+      // 1. Create the deck with user_id
       const { data: deck, error: deckError } = await supabase
         .from("decks")
         .insert({
           title,
           description,
+          user_id: user.id,
         })
         .select()
         .single();

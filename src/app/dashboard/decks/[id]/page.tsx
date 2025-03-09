@@ -106,9 +106,14 @@ export default async function DeckDetails({
             </div>
 
             <div className="mt-8 flex gap-4">
-              <Button className="flex-1" disabled={!questions?.length}>
-                <Play size={16} className="mr-2" /> Start Studying
-              </Button>
+              <Link
+                href={`/dashboard/decks/${params.id}/study`}
+                className="flex-1"
+              >
+                <Button className="w-full" disabled={!questions?.length}>
+                  <Play size={16} className="mr-2" /> Start Studying
+                </Button>
+              </Link>
               <Link
                 href={`/dashboard/decks/${params.id}/edit`}
                 className="flex-1"

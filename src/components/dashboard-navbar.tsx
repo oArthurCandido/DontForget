@@ -50,14 +50,16 @@ export default function DashboardNavbar() {
           </div>
         </div>
         <div className="flex gap-4 items-center">
-          <Button
-            variant="outline"
-            size="sm"
-            className="hidden md:flex items-center"
-          >
-            <Plus className="mr-1 h-4 w-4" />
-            New Deck
-          </Button>
+          <Link href="/dashboard/create">
+            <Button
+              variant="outline"
+              size="sm"
+              className="hidden md:flex items-center"
+            >
+              <Plus className="mr-1 h-4 w-4" />
+              New Deck
+            </Button>
+          </Link>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon">
@@ -71,7 +73,11 @@ export default function DashboardNavbar() {
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem>
-                <Link href="/dashboard/profile" className="flex w-full">
+                <Link
+                  href="/dashboard/profile"
+                  className="flex w-full items-center gap-2"
+                >
+                  <UserCircle className="h-4 w-4" />
                   Profile
                 </Link>
               </DropdownMenuItem>

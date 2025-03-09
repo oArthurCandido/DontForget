@@ -115,22 +115,26 @@ export default function EditDeck({ params }: { params: { id: string } }) {
 
   const updateQuestionText = (id: string, text: string) => {
     setQuestions(
-      questions.map((q) => (q.id === id ? { ...q, questionText: text } : q))
+      questions.map((q) => (q.id === id ? { ...q, questionText: text } : q)),
     );
   };
 
-  const updateAnswerText = (questionId: string, answerId: string, text: string) => {
+  const updateAnswerText = (
+    questionId: string,
+    answerId: string,
+    text: string,
+  ) => {
     setQuestions(
       questions.map((q) =>
         q.id === questionId
           ? {
               ...q,
               answers: q.answers.map((a) =>
-                a.id === answerId ? { ...a, text } : a
+                a.id === answerId ? { ...a, text } : a,
               ),
             }
-          : q
-      )
+          : q,
+      ),
     );
   };
 
@@ -145,8 +149,8 @@ export default function EditDeck({ params }: { params: { id: string } }) {
                 isCorrect: a.id === answerId,
               })),
             }
-          : q
-      )
+          : q,
+      ),
     );
   };
 
@@ -156,7 +160,7 @@ export default function EditDeck({ params }: { params: { id: string } }) {
 
   const handleSubmit = async () => {
     if (!deck) return;
-    
+
     if (!deck.title.trim()) {
       alert("Please enter a deck title");
       return;
@@ -164,7 +168,7 @@ export default function EditDeck({ params }: { params: { id: string } }) {
 
     // Validate questions with content
     const questionsWithContent = questions.filter(
-      (q) => q.questionText.trim() !== ""
+      (q) => q.questionText.trim() !== "",
     );
 
     if (questionsWithContent.length === 0) {
@@ -182,7 +186,7 @@ export default function EditDeck({ params }: { params: { id: string } }) {
 
       // Only check answers with content
       const answersWithContent = question.answers.filter(
-        (a) => a.text.trim() !== ""
+        (a) => a.text.trim() !== "",
       );
       if (answersWithContent.length < 2) {
         alert("Each question must have at least two answer options");
@@ -191,10 +195,12 @@ export default function EditDeck({ params }: { params: { id: string } }) {
 
       // Make sure at least one answer with content is marked correct
       const hasCorrectAnswerWithContent = answersWithContent.some(
-        (a) => a.isCorrect
+        (a) => a.isCorrect,
       );
       if (!hasCorrectAnswerWithContent) {
-        alert("Each question must have at least one correct answer with content");
+        alert(
+          "Each question must have at least one correct answer with content",
+        );
         return;
       }
     }
@@ -202,6 +208,15 @@ export default function EditDeck({ params }: { params: { id: string } }) {
     setIsSaving(true);
 
     try {
+      // Get current user
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (!user) {
+        throw new Error("User not authenticated");
+      }
+
       // 1. Update the deck
       const { error: deckError } = await supabase
         .from("decks")
@@ -210,7 +225,8 @@ export default function EditDeck({ params }: { params: { id: string } }) {
           description: deck.description,
           updated_at: new Date().toISOString(),
         })
-        .eq("id", deck.id);
+        .eq("id", deck.id)
+        .eq("user_id", user.id);
 
       if (deckError) throw deckError;
 
@@ -246,7 +262,7 @@ export default function EditDeck({ params }: { params: { id: string } }) {
 
         // Filter out empty answers
         const validAnswers = question.answers.filter(
-          (a) => a.text.trim() !== ""
+          (a) => a.text.trim() !== "",
         );
 
         // Handle answers for this question
@@ -342,3 +358,118 @@ export default function EditDeck({ params }: { params: { id: string } }) {
                 />
               </div>
             </div>
+          </div>
+
+          {/* Questions */}
+          <div className="space-y-6">
+            <h2 className="text-xl font-semibold">Questions</h2>
+
+            {/* Questions List */}
+            {questions.map((question, index) => (
+              <div
+                key={question.id}
+                className="bg-white rounded-xl p-6 border shadow-sm relative"
+              >
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="absolute top-4 right-4"
+                  onClick={() => removeQuestion(question.id)}
+                >
+                  <X size={18} />
+                </Button>
+
+                <h3 className="text-lg font-medium mb-4">
+                  Question {index + 1}
+                </h3>
+
+                <div className="space-y-6">
+                  <div className="space-y-2">
+                    <Label htmlFor={`question-${question.id}`}>
+                      Question Text
+                    </Label>
+                    <Input
+                      id={`question-${question.id}`}
+                      placeholder="Enter your question here"
+                      value={question.questionText}
+                      onChange={(e) =>
+                        updateQuestionText(question.id, e.target.value)
+                      }
+                    />
+                  </div>
+
+                  <div className="space-y-4">
+                    <Label>Answer Options</Label>
+                    <p className="text-sm text-gray-500">
+                      Select the correct answer(s)
+                    </p>
+
+                    {question.answers.map((answer, answerIndex) => (
+                      <div key={answer.id} className="flex items-center gap-3">
+                        <div
+                          className={`w-6 h-6 rounded-full border flex items-center justify-center cursor-pointer ${
+                            answer.isCorrect
+                              ? "bg-green-100 border-green-500 text-green-500"
+                              : "border-gray-300"
+                          }`}
+                          onClick={() =>
+                            setCorrectAnswer(question.id, answer.id)
+                          }
+                        >
+                          {answer.isCorrect && "✓"}
+                        </div>
+                        <Input
+                          placeholder={`Answer option ${answerIndex + 1}`}
+                          value={answer.text}
+                          onChange={(e) =>
+                            updateAnswerText(
+                              question.id,
+                              answer.id,
+                              e.target.value,
+                            )
+                          }
+                          className="flex-1"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            ))}
+
+            {/* Add Question Button */}
+            <Button
+              variant="outline"
+              className="w-full py-8 border-dashed"
+              onClick={addQuestion}
+            >
+              <Plus size={18} className="mr-2" />
+              Add Question
+            </Button>
+
+            {/* Save Button */}
+            <div className="flex justify-end pt-4">
+              <Button
+                onClick={handleSubmit}
+                disabled={isSaving}
+                className="min-w-[120px]"
+              >
+                {isSaving ? (
+                  <>
+                    <Loader2 size={18} className="mr-2 animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  <>
+                    <Save size={18} className="mr-2" />
+                    Save Changes
+                  </>
+                )}
+              </Button>
+            </div>
+          </div>
+        </div>
+      </main>
+    </>
+  );
+}
